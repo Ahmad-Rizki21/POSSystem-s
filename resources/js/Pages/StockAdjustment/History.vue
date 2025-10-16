@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ref, onMounted } from 'vue';
 
@@ -65,7 +65,18 @@ const loadTransactions = async () => {
         if (dateFrom.value) params.append('start_date', dateFrom.value);
         if (dateTo.value) params.append('end_date', dateTo.value);
 
-        const response = await fetch(route('stock-adjustment.history-data') + (params.toString() ? '?' + params.toString() : ''));
+        const response = await fetch(route('stock-adjustment.history-data') + (params.toString() ? '?' + params.toString() : ''), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         transactions.value = data.data || [];
         pagination.value = {
@@ -107,7 +118,18 @@ const goToPage = async (page) => {
         if (dateTo.value) params.append('end_date', dateTo.value);
         params.append('page', page);
 
-        const response = await fetch(route('stock-adjustment.history-data') + (params.toString() ? '?' + params.toString() : ''));
+        const response = await fetch(route('stock-adjustment.history-data') + (params.toString() ? '?' + params.toString() : ''), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         transactions.value = data.data || [];
         pagination.value = {

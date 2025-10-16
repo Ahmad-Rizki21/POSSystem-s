@@ -368,7 +368,6 @@ import { Link } from '@inertiajs/vue3';
     transform: translateY(-5px);
 }
 
-
 /* Illustration Section */
 .illustration-section {
     display: flex;
@@ -1013,103 +1012,149 @@ import { Link } from '@inertiajs/vue3';
     }
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN - PERBAIKAN MOBILE
+   ======================================== */
+
+/* Tablet & Mobile - Sembunyikan Ilustrasi */
 @media (max-width: 1024px) {
     .content-wrapper {
         grid-template-columns: 1fr;
-        gap: 2rem;
-        padding: 1.5rem;
+        gap: 0;
+        padding: 0;
+        min-height: 100vh;
     }
 
+    /* Sembunyikan ilustrasi di tablet dan mobile */
     .illustration-section {
-        order: -1;
+        display: none;
     }
 
-    .illustration-content {
-        height: 350px;
-        transform: scale(0.85);
+    .form-section {
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
     }
 
-    .welcome-text h2 {
-        font-size: 2rem;
-    }
-
-    .welcome-text p {
-        font-size: 1rem;
+    .form-card {
+        max-width: 100%;
     }
 }
 
+/* Tablet Specific */
 @media (max-width: 768px) {
+    /* Optimasi untuk mobile */
+    .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .content-wrapper {
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-section {
+        width: 100%;
+        padding: 1rem;
+        min-height: auto;
+    }
+
     .form-card {
-        padding: 2rem;
+        padding: 2rem 1.5rem;
+        box-shadow: 
+            0 10px 40px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
     }
 
-    .card-3d-inner {
-        padding: 2rem;
+    /* Kurangi opacity elemen dekoratif di mobile */
+    .floating-icons {
+        opacity: 0.3;
     }
 
-    .illustration-content {
-        height: 300px;
-        transform: scale(0.7);
-    }
-
-    .welcome-text h2 {
-        font-size: 1.75rem;
-    }
-
-    .welcome-text p {
-        font-size: 0.95rem;
-    }
-
-    .floating-element {
-        width: 40px;
-        height: 40px;
+    .grid-pattern {
+        opacity: 0.3;
     }
 
     .float-icon {
-        font-size: 2rem;
+        font-size: 1.5rem;
+    }
+
+    .floating-element {
+        display: none;
     }
 }
 
+/* Mobile Phone Specific */
 @media (max-width: 480px) {
+    .login-container {
+        padding: 1rem;
+    }
+
     .content-wrapper {
+        padding: 0.5rem;
+    }
+
+    .form-section {
+        padding: 0.5rem;
+    }
+
+    .form-card {
+        padding: 1.5rem 1.25rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Sembunyikan semua elemen dekoratif untuk performa */
+    .illustration-section,
+    .floating-icons,
+    .grid-pattern {
+        display: none;
+    }
+
+    /* Optimalkan gradient background untuk performa */
+    .animated-background {
+        display: none;
+    }
+
+    .login-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+}
+
+/* Landscape mode di mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .form-section {
+        min-height: auto;
         padding: 1rem;
     }
 
     .form-card {
-        padding: 1.5rem;
-        border-radius: 16px;
+        max-width: 500px;
+        margin: 0 auto;
     }
 
-    .card-3d-inner {
-        padding: 1.5rem;
-        border-radius: 20px;
+    .login-container {
+        align-items: flex-start;
+        padding-top: 2rem;
     }
+}
 
-    .illustration-content {
-        height: 250px;
-        transform: scale(0.6);
+/* Smooth scrolling untuk mobile */
+@media (max-width: 768px) {
+    .login-container {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
     }
+}
 
-    .welcome-text {
-        margin-top: 2rem;
-    }
-
-    .welcome-text h2 {
-        font-size: 1.5rem;
-    }
-
-    .welcome-text p {
-        font-size: 0.9rem;
-    }
-
-    .floating-element {
-        width: 35px;
-        height: 35px;
-    }
-
-    .float-icon {
-        font-size: 1.5rem;
+/* Very Small Devices */
+@media (max-width: 360px) {
+    .form-card {
+        padding: 1.25rem 1rem;
     }
 }
 

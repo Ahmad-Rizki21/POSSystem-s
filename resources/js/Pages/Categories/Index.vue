@@ -1,6 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, watch, computed } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -11,20 +11,6 @@ const props = defineProps({
 const search = ref('');
 const categories = ref(props.categories || []);
 const viewMode = ref('grid');
-
-onMounted(() => {
-    fetchCategories();
-});
-
-const fetchCategories = () => {
-    axios.get('/api/categories')
-        .then(response => {
-            categories.value = response.data;
-        })
-        .catch(error => {
-            console.error('Error fetching categories:', error);
-        });
-};
 
 const filteredCategories = computed(() => {
     if (!search.value.trim()) {
@@ -37,14 +23,15 @@ const filteredCategories = computed(() => {
 
 const confirmDelete = (categoryId) => {
     if (confirm('Are you sure you want to delete this category?')) {
-        axios.delete(`/api/categories/${categoryId}`)
-            .then(() => {
-                fetchCategories();
-            })
-            .catch(error => {
-                console.error('Error deleting category:', error);
-                alert('Error deleting category');
-            });
+        router.delete(route('categories.destroy', categoryId), {
+            onSuccess: () => {
+                // Success message will be shown automatically from flash message
+            },
+            onError: (errors) => {
+                console.error('Error deleting category:', errors);
+                alert(`Error deleting category: ${errors.error || errors.message || 'Unknown error'}`);
+            }
+        });
     }
 };
 

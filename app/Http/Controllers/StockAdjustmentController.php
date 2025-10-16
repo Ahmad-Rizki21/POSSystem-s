@@ -164,8 +164,24 @@ class StockAdjustmentController extends Controller
             ]);
         }
 
+        // Search by product name or SKU
+        if ($request->search) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('sku', 'like', '%' . $request->search . '%');
+            });
+        }
+
         $transactions = $query->orderBy('created_at', 'desc')
             ->paginate(20);
+
+        // Add image_url to each transaction's product
+        $transactions->getCollection()->transform(function ($transaction) {
+            if ($transaction->product) {
+                $transaction->product->image_url = $transaction->product->image ? asset('storage/' . $transaction->product->image) : null;
+            }
+            return $transaction;
+        });
 
         return response()->json($transactions);
     }

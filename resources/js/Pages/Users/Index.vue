@@ -1,6 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, watch, computed } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -10,20 +10,6 @@ const props = defineProps({
 
 const search = ref('');
 const users = ref(props.users || []);
-
-onMounted(() => {
-    fetchUsers();
-});
-
-const fetchUsers = () => {
-    axios.get('/api/users')
-        .then(response => {
-            users.value = response.data;
-        })
-        .catch(error => {
-            console.error('Error fetching users:', error);
-        });
-};
 
 const filteredUsers = computed(() => {
     if (!search.value.trim()) {
@@ -45,36 +31,26 @@ const getRoleBadgeClass = (role) => {
 };
 
 const confirmDelete = (userId) => {
+    console.log('Attempting to delete user:', userId);
+
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        // Get CSRF token from meta tag
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        
-        axios.delete(`/api/users/${userId}`, {
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest',
+        // Use Inertia's delete method to call the web route
+        router.delete(route('users.destroy', userId), {
+            onSuccess: (page) => {
+                console.log('User deleted successfully:', page);
+                // Force page reload to see updated user list
+                window.location.href = route('users.index');
+            },
+            onError: (errors) => {
+                console.error('Error deleting user:', errors);
+                alert(`Error deleting user: ${errors.error || errors.message || 'Unknown error'}`);
+            },
+            onFinish: () => {
+                console.log('Delete request finished');
             }
-        })
-            .then(() => {
-                fetchUsers();
-            })
-            .catch(error => {
-                console.error('Error deleting user:', error);
-                if (error.response) {
-                    // Server responded with error status
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                    alert(`Error deleting user: ${error.response.data.message || error.response.data.error || 'Unknown error'}`);
-                } else if (error.request) {
-                    // Request was made but no response received
-                    console.error('No response received:', error.request);
-                    alert('No response from server. Please try again.');
-                } else {
-                    // Something else happened
-                    console.error('Error message:', error.message);
-                    alert('An error occurred. Please try again.');
-                }
-            });
+        });
+    } else {
+        console.log('Delete cancelled by user');
     }
 };
 </script>

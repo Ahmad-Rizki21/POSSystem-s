@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -17,16 +17,7 @@ const stats = ref(props.stats || {
     todayRevenue: 0
 });
 
-onMounted(() => {
-    // Fetch dashboard stats
-    axios.get('/api/dashboard/stats')
-        .then(response => {
-            stats.value = response.data;
-        })
-        .catch(error => {
-            console.error('Error fetching dashboard stats:', error);
-        });
-});
+// Stats are already provided via Inertia props, no need to fetch via API
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {

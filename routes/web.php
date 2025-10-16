@@ -46,7 +46,14 @@ Route::middleware(['auth', 'role:admin,cashier'])->group(function () {
 });
 
 // Stock History Route (NEW - Simple and Clean)
-Route::middleware(['web', 'auth'])->get('/stock-history', [StockAdjustmentController::class, 'history'])->name('stock.history');
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/stock-history', [StockAdjustmentController::class, 'history'])->name('stock.history');
+});
+
+// Stock Adjustment API routes for authenticated users
+Route::middleware(['auth', 'role:admin,cashier'])->group(function () {
+    Route::get('/stock-adjustment/history-data', [StockAdjustmentController::class, 'historyData'])->name('stock-adjustment.history-data');
+});
 
 // Reports
 Route::middleware(['auth', 'role:admin'])->group(function () {

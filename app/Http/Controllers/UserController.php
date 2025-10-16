@@ -117,12 +117,24 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        // Debug logging
+        \Log::info('Attempting to delete user', [
+            'user_to_delete_id' => $user->id,
+            'user_to_delete_name' => $user->name,
+            'authenticated_user_id' => auth()->id(),
+            'authenticated_user_name' => auth()->user()->name,
+            'authenticated_user_role' => auth()->user()->role ? auth()->user()->role->name : 'no role'
+        ]);
+
         if ($user->id === auth()->id()) {
-            return response()->json(['error' => 'You cannot delete your own account.'], 400);
+            \Log::warning('User attempted to delete own account', ['user_id' => $user->id]);
+            return redirect()->route('users.index')->with('error', 'You cannot delete your own account.');
         }
 
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully.']);
+        \Log::info('User deleted successfully', ['deleted_user_id' => $user->id]);
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }
 }

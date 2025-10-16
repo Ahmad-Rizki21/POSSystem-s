@@ -114,131 +114,149 @@ const toggleSubmenu = (itemName) => {
 
 <template>
     <div class="min-h-screen bg-gray-50 flex flex-col">
-        <!-- Mobile sidebar -->
+        <!-- Mobile sidebar backdrop -->
         <transition
-            enter-active-class="transition ease-out duration-300"
-            enter-from-class="opacity-0 -translate-x-full"
-            enter-to-class="opacity-100 translate-x-0"
-            leave-active-class="transition ease-in duration-300"
-            leave-from-class="opacity-100 translate-x-0"
-            leave-to-class="opacity-0 -translate-x-full"
+            enter-active-class="transition-opacity ease-linear duration-300"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity ease-linear duration-300"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
         >
-            <div v-if="sidebarOpen" class="fixed inset-0 z-50 lg:hidden">
-                <!-- Off-canvas menu overlay -->
-                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm" @click="sidebarOpen = false"></div>
-                
-                <!-- Off-canvas menu container -->
-                <div class="relative flex w-full max-w-xs flex-1 bg-white shadow-2xl">
-                    <div class="absolute top-0 right-0 -mr-12 pt-4">
+            <div v-if="sidebarOpen" class="fixed inset-0 z-40 lg:hidden" @click="sidebarOpen = false">
+                <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
+            </div>
+        </transition>
+
+        <!-- Mobile Sidebar Panel -->
+        <transition
+            enter-active-class="transition ease-in-out duration-300 transform"
+            enter-from-class="-translate-x-full"
+            enter-to-class="translate-x-0"
+            leave-active-class="transition ease-in-out duration-300 transform"
+            leave-from-class="translate-x-0"
+            leave-to-class="-translate-x-full"
+        >
+            <div v-if="sidebarOpen" class="fixed inset-y-0 left-0 z-50 w-80 lg:hidden">
+                <div class="flex h-full flex-col bg-gradient-to-b from-indigo-600 to-indigo-700 shadow-2xl">
+                    <!-- Sidebar Header with Close Button -->
+                    <div class="flex h-20 items-center justify-between px-6 bg-indigo-800">
+                        <Link :href="route('dashboard')" class="flex items-center" @click="sidebarOpen = false">
+                            <ApplicationLogo class="block h-9 w-auto fill-current text-white" />
+                            <span class="ml-3 text-xl font-bold text-white">Store POS</span>
+                        </Link>
                         <button
                             @click="sidebarOpen = false"
-                            class="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-white bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                            class="rounded-lg p-2 text-indigo-200 hover:bg-indigo-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white transition-colors"
                         >
-                            <span class="sr-only">Close sidebar</span>
-                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
 
-                    <div class="flex w-72 flex-shrink-0">
-                        <div class="flex w-full flex-col bg-gradient-to-b from-indigo-600 to-indigo-700">
-                            <!-- Sidebar header -->
-                            <div class="flex h-20 items-center justify-between px-6 bg-indigo-800">
-                                <Link :href="route('dashboard')" class="flex items-center">
-                                    <ApplicationLogo class="block h-8 w-auto fill-current text-white" />
-                                    <span class="ml-3 text-xl font-bold text-white">Store POS</span>
-                                </Link>
+                    <!-- User Info Card -->
+                    <div class="mx-4 my-4 rounded-xl bg-white/10 backdrop-blur-sm p-4 border border-white/20">
+                        <div class="flex items-center">
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-br from-white/30 to-white/10 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                {{ user.name.charAt(0).toUpperCase() }}
                             </div>
-
-                            <!-- User info -->
-                            <!-- <div class="px-6 py-4 bg-indigo-800 bg-opacity-50">
-                                <div class="flex items-center">
-                                    <div class="h-10 w-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white font-bold">
-                                        {{ user.name.charAt(0).toUpperCase() }}
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-white">{{ user.name }}</p>
-                                        <p class="text-xs text-indigo-200 capitalize">{{ user.role }}</p>
-                                    </div>
-                                </div>
-                            </div> -->
-
-                            <!-- Sidebar navigation -->
-                            <div class="flex-1 overflow-y-auto pb-4 pt-5">
-                                <nav class="flex-1 space-y-2 px-3">
-                                    <template v-for="item in navigation" :key="item.name">
-                                        <!-- Main menu item -->
-                                        <div>
-                                            <Link
-                                                v-if="!item.subItems"
-                                                :href="item.href"
-                                                :class="[
-                                                    item.current
-                                                        ? 'bg-white bg-opacity-20 text-white border-r-4 border-white'
-                                                        : 'text-indigo-100 hover:bg-white hover:bg-opacity-10 hover:text-white',
-                                                    'group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200'
-                                                ]"
-                                            >
-                                                <svg class="mr-3 h-5 w-5 flex-shrink-0" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"></path>
-                                                </svg>
-                                                {{ item.name }}
-                                            </Link>
-
-                                            <!-- Menu item with submenu -->
-                                            <div v-else>
-                                                <button
-                                                    @click="toggleSubmenu(item.name)"
-                                                    :class="[
-                                                        item.current
-                                                            ? 'bg-white bg-opacity-20 text-white'
-                                                            : 'text-indigo-100 hover:bg-white hover:bg-opacity-10 hover:text-white',
-                                                        'group flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200'
-                                                    ]"
-                                                >
-                                                    <svg class="mr-3 h-5 w-5 flex-shrink-0" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"></path>
-                                                    </svg>
-                                                    <span class="flex-1 text-left">{{ item.name }}</span>
-                                                    <svg 
-                                                        :class="[
-                                                            'ml-3 h-4 w-4 transition-transform duration-200',
-                                                            expandedItems.includes(item.name) ? 'rotate-90' : ''
-                                                        ]" 
-                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                    >
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                                    </svg>
-                                                </button>
-
-                                                <!-- Submenu -->
-                                                <transition
-                                                    enter-active-class="transition duration-200 ease-out"
-                                                    enter-from-class="transform scale-95 opacity-0"
-                                                    enter-to-class="transform scale-100 opacity-100"
-                                                    leave-active-class="transition duration-75 ease-in"
-                                                    leave-from-class="transform scale-100 opacity-100"
-                                                    leave-to-class="transform scale-95 opacity-0"
-                                                >
-                                                    <div v-if="expandedItems.includes(item.name)" class="mt-2 space-y-1">
-                                                        <Link
-                                                            v-for="subItem in item.subItems"
-                                                            :key="subItem.name"
-                                                            :href="subItem.href"
-                                                            class="group flex items-center pl-12 pr-4 py-2 text-sm text-indigo-100 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-all duration-200"
-                                                        >
-                                                            <span class="w-2 h-2 bg-indigo-300 rounded-full mr-3 group-hover:bg-white"></span>
-                                                            {{ subItem.name }}
-                                                        </Link>
-                                                    </div>
-                                                </transition>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </nav>
+                            <div class="ml-3 flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-white truncate">{{ user.name }}</p>
+                                <p class="text-xs text-indigo-200 truncate">{{ user.email }}</p>
+                                <span v-if="user.role" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white mt-1">
+                                    {{ user.role.display_name }}
+                                </span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Sidebar Navigation -->
+                    <div class="flex-1 overflow-y-auto px-3 pb-4 mobile-scrollbar">
+                        <nav class="space-y-1">
+                            <template v-for="item in navigation" :key="item.name">
+                                <!-- Main menu item without submenu -->
+                                <Link
+                                    v-if="!item.subItems"
+                                    :href="item.href"
+                                    @click="sidebarOpen = false"
+                                    :class="[
+                                        item.current
+                                            ? 'bg-white/20 text-white shadow-lg'
+                                            : 'text-indigo-100 hover:bg-white/10 hover:text-white',
+                                        'group flex items-center px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200'
+                                    ]"
+                                >
+                                    <svg class="mr-3 h-5 w-5 flex-shrink-0" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"></path>
+                                    </svg>
+                                    {{ item.name }}
+                                </Link>
+
+                                <!-- Menu item with submenu -->
+                                <div v-else class="space-y-1">
+                                    <button
+                                        @click="toggleSubmenu(item.name)"
+                                        :class="[
+                                            item.current
+                                                ? 'bg-white/20 text-white'
+                                                : 'text-indigo-100 hover:bg-white/10 hover:text-white',
+                                            'group flex items-center w-full px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200'
+                                        ]"
+                                    >
+                                        <svg class="mr-3 h-5 w-5 flex-shrink-0" :class="[item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"></path>
+                                        </svg>
+                                        <span class="flex-1 text-left">{{ item.name }}</span>
+                                        <svg 
+                                            :class="[
+                                                'ml-3 h-4 w-4 transition-transform duration-200',
+                                                expandedItems.includes(item.name) ? 'rotate-90' : ''
+                                            ]" 
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        >
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Submenu with smooth transition -->
+                                    <transition
+                                        enter-active-class="transition duration-200 ease-out"
+                                        enter-from-class="transform scale-95 opacity-0 -translate-y-2"
+                                        enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                                        leave-active-class="transition duration-150 ease-in"
+                                        leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                                        leave-to-class="transform scale-95 opacity-0 -translate-y-2"
+                                    >
+                                        <div v-if="expandedItems.includes(item.name)" class="ml-4 mt-1 space-y-1 border-l-2 border-indigo-400/30 pl-4">
+                                            <Link
+                                                v-for="subItem in item.subItems"
+                                                :key="subItem.name"
+                                                :href="subItem.href"
+                                                @click="sidebarOpen = false"
+                                                class="group flex items-center px-3 py-2.5 text-sm text-indigo-100 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                                            >
+                                                <span class="w-1.5 h-1.5 bg-indigo-300 rounded-full mr-3 group-hover:bg-white group-hover:scale-125 transition-all"></span>
+                                                {{ subItem.name }}
+                                            </Link>
+                                        </div>
+                                    </transition>
+                                </div>
+                            </template>
+                        </nav>
+                    </div>
+
+                    <!-- Sidebar Footer -->
+                    <div class="border-t border-white/10 p-4">
+                        <button
+                            @click="$inertia.post(route('logout')); sidebarOpen = false"
+                            class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-white bg-red-500/20 hover:bg-red-500/30 rounded-xl transition-colors duration-200 border border-red-400/30"
+                        >
+                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            Sign Out
+                        </button>
                     </div>
                 </div>
             </div>
@@ -254,19 +272,6 @@ const toggleSubmenu = (itemName) => {
                         <span class="ml-3 text-xl font-bold text-white">Store POS</span>
                     </Link>
                 </div>
-
-                <!-- User info -->
-                <!-- <div class="px-6 py-4 bg-indigo-800 bg-opacity-50">
-                    <div class="flex items-center">
-                        <div class="h-10 w-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white font-bold">
-                            {{ user.name.charAt(0).toUpperCase() }}
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-white">{{ user.name }}</p>
-                            <p class="text-xs text-indigo-200 capitalize">{{ user.role }}</p>
-                        </div>
-                    </div>
-                </div> -->
 
                 <!-- Sidebar navigation -->
                 <div class="mt-5 flex flex-1 flex-col pb-4">
@@ -385,18 +390,6 @@ const toggleSubmenu = (itemName) => {
 
                 <!-- User dropdown and notifications -->
                 <div class="ml-4 flex flex-1 items-center justify-end pr-4 space-x-4">
-                    <!-- Notifications -->
-                    <!-- <button class="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full transition-colors duration-200">
-                        <span class="sr-only">View notifications</span>
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM11 17H6l5 5v-5zM12 3v9l4-4M8 7l4 4"></path>
-                        </svg> -->
-                        <!-- Notification badge -->
-                        <!-- <span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
-                            <span class="text-xs font-medium text-white">3</span>
-                        </span>
-                    </button> -->
-
                     <!-- User dropdown -->
                     <Dropdown align="right" width="64">
                         <template #trigger>
@@ -470,7 +463,7 @@ const toggleSubmenu = (itemName) => {
         </div>
 
         <!-- Mobile bottom navigation (for mobile devices) -->
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-50">
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-50 safe-area-bottom">
             <div class="grid grid-cols-4 gap-1">
                 <Link
                     v-for="item in navigation.slice(0, 4)"
@@ -513,3 +506,36 @@ const toggleSubmenu = (itemName) => {
         </footer>
     </div>
 </template>
+
+<style scoped>
+/* Custom Scrollbar untuk Mobile Sidebar */
+.mobile-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mobile-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mobile-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.mobile-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Safe area untuk notch di mobile */
+.safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Smooth scrolling */
+@media (max-width: 1024px) {
+    .mobile-scrollbar {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+</style>

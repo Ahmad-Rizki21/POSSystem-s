@@ -1,6 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted, watch } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
@@ -13,20 +13,6 @@ const products = ref(props.products || []);
 const selectedCategory = ref('');
 const sortBy = ref('name');
 const sortOrder = ref('asc');
-
-onMounted(() => {
-    fetchProducts();
-});
-
-const fetchProducts = () => {
-    axios.get('/api/products')
-        .then(response => {
-            products.value = response.data;
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error);
-        });
-};
 
 const filteredProducts = ref([]);
 
@@ -71,10 +57,8 @@ const updateFilteredProducts = () => {
 // Watch for changes
 watch([search, selectedCategory, sortBy, sortOrder], updateFilteredProducts);
 
-// Initialize filtered products
-onMounted(() => {
-    updateFilteredProducts();
-});
+// Initialize filtered products immediately
+updateFilteredProducts();
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
@@ -87,16 +71,16 @@ const formatCurrency = (amount) => {
 
 const confirmDelete = (productId, productName) => {
     if (confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
-        axios.delete(`/api/products/${productId}`)
-            .then(() => {
-                fetchProducts();
-                // Show success message
-                alert('Product deleted successfully!');
-            })
-            .catch(error => {
-                console.error('Error deleting product:', error);
-                alert('Error deleting product. Please try again.');
-            });
+        // Use Inertia's delete method
+        router.delete(route('products.destroy', productId), {
+            onSuccess: () => {
+                // Success message will be shown automatically from flash message
+            },
+            onError: (errors) => {
+                console.error('Error deleting product:', errors);
+                alert(`Error deleting product: ${errors.error || errors.message || 'Unknown error'}`);
+            }
+        });
     }
 };
 

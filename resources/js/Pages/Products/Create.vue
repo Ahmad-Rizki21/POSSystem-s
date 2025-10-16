@@ -1,7 +1,12 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+
+const props = defineProps({
+    auth: Object,
+    categories: Array
+});
 
 const name = ref('');
 const sku = ref('');
@@ -11,7 +16,6 @@ const selling_price = ref('');
 const stock = ref('');
 const unit = ref('pcs');
 const category_id = ref('');
-const categories = ref([]);
 const loading = ref(false);
 const errors = ref({});
 
@@ -19,20 +23,6 @@ const errors = ref({});
 const selectedImages = ref([]);
 const imagePreview = ref([]);
 const dragOver = ref(false);
-
-// Fetch categories for dropdown
-const fetchCategories = async () => {
-    try {
-        const response = await axios.get('/api/categories');
-        categories.value = response.data;
-    } catch (error) {
-        console.error('Error fetching categories:', error);
-    }
-};
-
-onMounted(() => {
-    fetchCategories();
-});
 
 // Image upload functions
 const handleImageSelect = (event) => {
