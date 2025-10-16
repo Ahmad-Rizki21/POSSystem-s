@@ -46,13 +46,34 @@ const getRoleBadgeClass = (role) => {
 
 const confirmDelete = (userId) => {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-        axios.delete(`/api/users/${userId}`)
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        
+        axios.delete(`/api/users/${userId}`, {
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
             .then(() => {
                 fetchUsers();
             })
             .catch(error => {
                 console.error('Error deleting user:', error);
-                alert('Error deleting user');
+                if (error.response) {
+                    // Server responded with error status
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                    alert(`Error deleting user: ${error.response.data.message || error.response.data.error || 'Unknown error'}`);
+                } else if (error.request) {
+                    // Request was made but no response received
+                    console.error('No response received:', error.request);
+                    alert('No response from server. Please try again.');
+                } else {
+                    // Something else happened
+                    console.error('Error message:', error.message);
+                    alert('An error occurred. Please try again.');
+                }
             });
     }
 };

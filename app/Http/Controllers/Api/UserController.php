@@ -89,12 +89,31 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        if ($user->id === auth()->id()) {
-            return response()->json(['error' => 'You cannot delete your own account.'], 400);
+        try {
+            if (!$user) {
+                return response()->json(['error' => 'User not found.'], 404);
+            }
+
+            if ($user->id === auth()->id()) {
+                return response()->json(['error' => 'You cannot delete your own account.'], 400);
+            }
+
+            // Check if user exists before attempting deletion
+            if (!$user->exists) {
+                return response()->json(['error' => 'User does not exist.'], 404);
+            }
+
+            $user->delete();
+
+            return response()->json(['message' => 'User deleted successfully.']);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting user: ' . $e->getMessage(), [
+                'user_id' => $user->id ?? null,
+                'auth_id' => auth()->id() ?? null,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json(['error' => 'Failed to delete user.'], 500);
         }
-
-        $user->delete();
-
-        return response()->json(['message' => 'User deleted successfully.']);
     }
 }
