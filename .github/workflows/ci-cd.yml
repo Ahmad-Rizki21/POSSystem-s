@@ -49,6 +49,9 @@ jobs:
     - name: Install Node dependencies
       run: npm ci --legacy-peer-deps
 
+    - name: Build assets
+      run: npm run build
+
     - name: Setup database
       run: |
         php artisan config:clear
@@ -62,9 +65,6 @@ jobs:
 
     - name: Run ESLint
       run: npm run lint || echo "No lint script found"
-
-    - name: Build assets
-      run: npm run build
 
   security:
     runs-on: ubuntu-latest
