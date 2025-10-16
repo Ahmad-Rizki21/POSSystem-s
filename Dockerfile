@@ -1,5 +1,12 @@
-# Use PHP 8.2 official image
-FROM php:8.2-fpm-alpine
+FROM php:8.3-fpm-alpine
+
+# Arguments
+ARG APP_ENV=production
+ARG APP_DEBUG=false
+
+# Environment variables
+ENV APP_ENV=${APP_ENV}
+ENV APP_DEBUG=${APP_DEBUG}
 
 # Set working directory
 WORKDIR /var/www/html
@@ -17,8 +24,10 @@ RUN apk add --no-cache \
     icu-dev \
     libffi-dev \
     libjpeg-turbo-dev \
-    libpng-dev \
-    freetype-dev
+    freetype-dev \
+    nodejs \
+    npm \
+    supervisor
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -30,44 +39,36 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     bcmath \
     intl \
     ffi \
-    opcache
+    opcache \
+    sockets \
+    exif
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/html
+# Copy application files
+COPY . /var/www/html
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Copy Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
-
 # Install Node dependencies and build assets
-RUN npm ci --only=production \
+RUN npm ci --production \
     && npm run build
 
-# Set environment variables
-ENV APP_NAME="POS System"
-ENV APP_ENV=production
-ENV APP_KEY=base64:rk6js0QfTJhxWvOCokNijesX7ToeHcF2zbtmekxkScc=
-ENV APP_DEBUG=false
-ENV APP_URL=http://localhost
+# Generate application key
+RUN php artisan key:generate --force
 
-# Optimize Laravel for production
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan optimize
+# Configure supervisord
+RUN echo "[supervisord]\ndaemon=0\n[program:php-worker]\ncommand=php artisan queue:work --sleep=1 --tries=3\nprocess_name=%(program_name)s_%(process_num)02d\nnumprocs=1\ndirectory=/var/www/html\nautostart=true\nautorestart=true\n" > /etc/supervisor/conf.d/supervisord.conf
 
-# Expose port 9000 and start php-fpm server
+# Expose port
 EXPOSE 9000
 
-CMD ["php-fpm"]
+# Start command
+CMD ["sh", "-c", "supervisord -c /etc/supervisor/conf.d/supervisord.conf & php-fpm"]

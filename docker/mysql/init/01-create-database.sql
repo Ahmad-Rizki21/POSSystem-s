@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS pos_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'pos_user'@'%' IDENTIFIED BY 'pos_password';
+GRANT ALL PRIVILEGES ON pos_system.* TO 'pos_user'@'%';
+FLUSH PRIVILEGES;
