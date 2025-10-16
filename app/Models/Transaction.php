@@ -18,6 +18,12 @@ class Transaction extends Model
         'change_amount',
     ];
 
+    protected $casts = [
+        'total_price' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'change_amount' => 'decimal:2',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -26,5 +32,36 @@ class Transaction extends Model
     public function items()
     {
         return $this->hasMany(TransactionItem::class);
+    }
+
+    // Accessor untuk formatted timestamp
+    public function getFormattedCreatedAtAttribute()
+    {
+        return $this->created_at->format('d M Y H:i:s');
+    }
+
+    public function getFormattedUpdatedAtAttribute()
+    {
+        return $this->updated_at->format('d M Y H:i:s');
+    }
+
+    public function getFormattedTotalPriceAttribute()
+    {
+        return 'Rp ' . number_format($this->total_price, 0, ',', '.');
+    }
+
+    public function scopeByDate($query, $date)
+    {
+        return $query->whereDate('created_at', $date);
+    }
+
+    public function scopeByDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    public function scopeByUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 }

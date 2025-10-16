@@ -37,6 +37,28 @@ const getStockStatus = (stock) => {
     if (stock <= 10) return { text: 'Low Stock', color: 'yellow' };
     return { text: 'In Stock', color: 'green' };
 };
+
+const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'N/A';
+    const date = new Date(dateTime);
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+};
+
+const formatDate = (date) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+};
 </script>
 
 <template>
@@ -103,6 +125,7 @@ const getStockStatus = (stock) => {
                             </div>
                             <div class="p-3 sm:p-4 bg-blue-50">
                                 <p class="text-xs text-blue-600">Active in catalog</p>
+                                <p class="text-xs text-blue-500 mt-1">Period: {{ startDate }} - {{ endDate }}</p>
                             </div>
                         </div>
 
@@ -316,7 +339,10 @@ const getStockStatus = (stock) => {
                                             {{ product.category?.name || 'N/A' }}
                                         </td>
                                         <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden lg:table-cell">
-                                            {{ new Date(product.updated_at).toLocaleDateString() }}
+                                            <div>
+                                                <div>{{ formatDate(product.updated_at) }}</div>
+                                                <div class="text-xs text-gray-400">{{ new Date(product.updated_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}</div>
+                                            </div>
                                         </td>
                                         <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                                             <Link :href="route('products.edit', product.id)" class="inline-flex items-center px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-md hover:bg-blue-200 transition-colors duration-200">

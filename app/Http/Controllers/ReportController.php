@@ -214,6 +214,9 @@ class ReportController extends Controller
         $endDate = $request->input('end_date', Carbon::now()->endOfDay()->toDateString());
         $period = $request->input('period', 'monthly');
 
+        // Debug: Log the dates being used
+        \Log::info("Financial Report - Start Date: {$startDate}, End Date: {$endDate}, Period: {$period}");
+
         // Calculate profit based on selling price - purchase price
         $profitData = Transaction::join('transaction_items', 'transactions.id', '=', 'transaction_items.transaction_id')
             ->join('products', 'transaction_items.product_id', '=', 'products.id')
@@ -276,6 +279,10 @@ class ReportController extends Controller
                 ->orderBy('year')
                 ->orderBy('period')
                 ->get();
+
+            // Debug: Log the results
+            \Log::info("Financial By Period Count: " . $financialByPeriod->count());
+            \Log::info("Financial By Period Data: " . json_encode($financialByPeriod->toArray()));
         }
 
         // Payment Method Analysis

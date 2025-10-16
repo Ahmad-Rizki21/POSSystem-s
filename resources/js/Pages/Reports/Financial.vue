@@ -34,12 +34,28 @@ const formatPercentage = (value) => {
 
 const getPeriodLabel = (period, value) => {
     if (period === 'daily') {
-        return new Date(value).toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        const date = new Date(value);
+        return date.toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) +
+               ' <span class="text-xs text-gray-500">(' + date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ')</span>';
     } else if (period === 'weekly') {
-        return `Week ${value}`;
+        return `Week ${value} <span class="text-xs text-gray-500">(All day)</span>`;
     } else {
-        return new Date(2024, value - 1, 1).toLocaleDateString('id-ID', { month: 'long' });
+        return new Date(2024, value - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) +
+               ' <span class="text-xs text-gray-500">(Monthly)</span>';
     }
+};
+
+const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'N/A';
+    const date = new Date(dateTime);
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
 };
 </script>
 
@@ -107,6 +123,7 @@ const getPeriodLabel = (period, value) => {
                             </div>
                             <div class="p-3 sm:p-4 bg-green-50">
                                 <p class="text-xs text-green-600">From {{ totalTransactions }} transactions</p>
+                                <p class="text-xs text-green-500 mt-1">Updated: {{ formatDateTime(new Date()) }}</p>
                             </div>
                         </div>
 
@@ -127,6 +144,7 @@ const getPeriodLabel = (period, value) => {
                             </div>
                             <div class="p-3 sm:p-4 bg-blue-50">
                                 <p class="text-xs text-blue-600">Profit Margin: {{ formatPercentage(profitMargin) }}</p>
+                                <p class="text-xs text-blue-500 mt-1">Range: {{ startDate }} - {{ endDate }}</p>
                             </div>
                         </div>
 
@@ -181,7 +199,7 @@ const getPeriodLabel = (period, value) => {
                             <table class="w-full">
                                 <thead class="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                                        <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period & Time</th>
                                         <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Transactions</th>
                                         <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
                                         <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Profit</th>
@@ -192,7 +210,7 @@ const getPeriodLabel = (period, value) => {
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <tr v-for="item in financialByPeriod" :key="item.period" class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
-                                            <div class="truncate max-w-[120px] sm:max-w-none">{{ getPeriodLabel(period, item.period) }}</div>
+                                            <div class="truncate max-w-[120px] sm:max-w-none" v-html="getPeriodLabel(period, item.period)"></div>
                                         </td>
                                         <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden sm:table-cell">
                                             {{ item.transaction_count }}
