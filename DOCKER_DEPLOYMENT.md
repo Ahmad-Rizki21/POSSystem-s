@@ -59,6 +59,14 @@ The Docker setup includes:
 - Supervisor for queue workers
 - Production-optimized Laravel settings
 
+## Environment Configuration
+
+The application uses different environment configurations:
+
+- **Production (Docker)**: Uses MySQL database with credentials defined in docker-compose.yml
+- **Local Development**: Uses MySQL database as configured in .env file
+- **Testing**: Uses SQLite in-memory database as configured in .env.testing
+
 ## Environment Variables
 
 The application uses these environment variables (set in docker-compose.yml):
