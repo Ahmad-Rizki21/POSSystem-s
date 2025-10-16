@@ -1,0 +1,155 @@
+name: CI/CD Pipeline for POS System
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: pos_system_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: pdo, pdo_mysql, mbstring, zip, gd, xml, ctype, iconv, intl, pdo, sqlite, pdo_sqlite, bcmath, dom, filter, gd, iconv, mbstring, pdo, tokenizer
+        coverage: xdebug
+
+    - name: Copy .env file
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    - name: Install Composer dependencies
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+    - name: Generate application key
+      run: php artisan key:generate
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Node dependencies
+      run: npm ci
+
+    - name: Setup database
+      run: |
+        php artisan config:clear
+        php artisan migrate --force
+
+    - name: Run PHPUnit tests
+      run: |
+        php artisan config:cache
+        php artisan test --coverage --min=80
+
+    - name: Run ESLint
+      run: npm run lint || echo "No lint script found"
+
+    - name: Build assets
+      run: npm run build
+
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+
+    - name: Install Composer dependencies
+      run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+    - name: Run security audit
+      run: |
+        composer audit
+        npm audit --audit-level moderate
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        composer install --no-dev --optimize-autoloader
+        npm ci --production
+
+    - name: Build assets for production
+      run: npm run build
+
+    - name: Build Electron app
+      run: |
+        npm run electron-pack
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pos-system-desktop
+        path: dist/
+        retention-days: 30
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploy to staging environment"
+        # Add your staging deployment commands here
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy-production, deploy-staging]
+    if: always()
+
+    steps:
+    - name: Notify on success
+      if: needs.deploy-production.result == 'success' || needs.deploy-staging.result == 'success'
+      run: |
+        echo "✅ Deployment successful!"
+        # Add notification logic (Slack, Discord, etc.)
+
+    - name: Notify on failure
+      if: needs.deploy-production.result == 'failure' || needs.deploy-staging.result == 'failure'
+      run: |
+        echo "❌ Deployment failed!"
+        # Add notification logic (Slack, Discord, etc.)

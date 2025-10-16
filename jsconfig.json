@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "ignoreDeprecations": "6.0",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["resources/js/*"],
+            "ziggy-js": ["./vendor/tightenco/ziggy"]
+        }
+    },
+    "vueCompilerOptions": {
+        "target": 3.3,
+        "globalTypesPath": "./vue-global-types.d.ts"
+    },
+    "exclude": ["node_modules", "public"]
+}
