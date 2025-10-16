@@ -13,7 +13,7 @@
         "dev": "vite",
         "electron": "npx electron .",
         "electron-dev": "concurrently \"npm run dev\" \"node scripts/start-electron-dev.cjs\"",
-        "electron-pack": "npm run build && node build-desktop.cjs && electron-builder",
+        "electron-pack": "npm run build && node build-desktop.cjs && npx electron-builder",
         "preelectron-pack": "npm run build",
         "build-desktop": "node build-desktop.cjs",
         "postinstall": "npm run install-app-deps",
