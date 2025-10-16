@@ -52,6 +52,7 @@ jobs:
     - name: Setup database
       run: |
         php artisan config:clear
+        cp .env.testing .env
         php artisan migrate --force
 
     - name: Run PHPUnit tests
