@@ -22,3 +22,22 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Build artifacts
+/dist/
+/build/
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.snap
+*.tar.gz
+*.zip
+
+# Electron specific
+resources/mysql/
+
+# IDE specific
+*.swp
+*.swo
+*~
