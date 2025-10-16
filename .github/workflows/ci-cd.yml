@@ -47,7 +47,7 @@ jobs:
         cache: 'npm'
 
     - name: Install Node dependencies
-      run: npm ci
+      run: npm ci --legacy-peer-deps
 
     - name: Setup database
       run: |
@@ -104,7 +104,7 @@ jobs:
     - name: Install dependencies
       run: |
         composer install --no-dev --optimize-autoloader
-        npm ci --production
+        npm ci --production --legacy-peer-deps
 
     - name: Build assets for production
       run: npm run build

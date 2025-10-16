@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         composer install --no-dev --optimize-autoloader
-        npm ci
+        npm ci --legacy-peer-deps
 
     - name: Build application
       run: npm run build
