@@ -15,7 +15,9 @@
         "electron-dev": "concurrently \"npm run dev\" \"node scripts/start-electron-dev.cjs\"",
         "electron-pack": "npm run build && node build-desktop.cjs && electron-builder",
         "preelectron-pack": "npm run build",
-        "build-desktop": "node build-desktop.cjs"
+        "build-desktop": "node build-desktop.cjs",
+        "postinstall": "npm run install-app-deps",
+        "install-app-deps": "electron-builder install-app-deps || echo 'Skipping electron-builder install-app-deps'"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
