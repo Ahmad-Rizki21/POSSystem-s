@@ -14,23 +14,32 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Admin user
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'ahmad@ajnusa.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        $adminRole = \App\Models\Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            User::create([
+                'name' => 'Administrator',
+                'email' => 'ahmad@ajnusa.com',
+                'password' => Hash::make('password'),
+                'role_id' => $adminRole->id,
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            $this->command->error('Admin role not found!');
+        }
 
         // Cashier users
-
-        User::create([
-            'name' => 'Sarah Cashier',
-            'email' => 'sarah@pos.com',
-            'password' => Hash::make('cashier123'),
-            'role' => 'cashier',
-            'email_verified_at' => now(),
-        ]);
+        $cashierRole = \App\Models\Role::where('name', 'cashier')->first();
+        if ($cashierRole) {
+            User::create([
+                'name' => 'Sarah Cashier',
+                'email' => 'sarah@pos.com',
+                'password' => Hash::make('cashier123'),
+                'role_id' => $cashierRole->id,
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            $this->command->error('Cashier role not found!');
+        }
 
         $this->command->info('✅ Users created successfully!');
         $this->command->info('📧 Admin: ahmad@ajnusa.com / password');
